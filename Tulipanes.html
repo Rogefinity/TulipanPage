@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Tulipanes</title>
+    <style>
+        :root {
+            /* Variables CSS dinámicas para los colores */
+            --color-flor: #ff4d6d;
+            --color-tallo: #2d6a4f;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+
+        /* Panel de controles */
+        .controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 100%;
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* Botones modernos */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Lienzo SVG */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 400px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        svg {
+            width: 100%;
+            max-width: 250px;
+            overflow: visible;
+        }
+
+        /* Elementos del SVG ocultos por defecto */
+        .svg-part {
+            opacity: 0;
+            transform: scale(0.5);
+            transform-origin: 100px 150px; /* Centro del cáliz de la flor */
+            transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Modificador de origen para el tallo y hojas */
+        #tallo, #hoja-izq, #hoja-der {
+            transform-origin: 100px 300px; 
+        }
+
+        /* Clase activa cuando se dibuja el paso */
+        .svg-part.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Aplicación de colores mediante variables CSS con filtros para profundidad visual */
+        #tallo { stroke: var(--color-tallo); }
+        .hoja { fill: var(--color-tallo); }
+        
+        /* Capas de la flor con filtros de brillo para dar volumen en 3D simulado */
+        .petalo-fondo { fill: var(--color-flor); filter: brightness(0.75); }
+        .petalo-lateral { fill: var(--color-flor); filter: brightness(0.9); }
+        .petalo-centro { fill: var(--color-flor); filter: brightness(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="controls">
+            <div>
+                <h1>Te amo</h1>
+                <p style="color: #64748b; font-size: 0.9rem;">Para el amor de mi vida</p>
+            </div>
+
+            <div class="control-group">
+                <label for="color-flor">Pétalos</label>
+                <input type="color" id="color-flor" value="#ff4d6d">
+            </div>
+
+            <div class="control-group">
+                <label for="color-tallo">Tallo y Hojas</label>
+                <input type="color" id="color-tallo" value="#2d6a4f">
+            </div>
+
+            <div class="btn-group">
+                <button id="btn-armar" class="btn-primary">Dibujar Tallo</button>
+                <button id="btn-reiniciar" class="btn-secondary">Reiniciar</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+                <path id="tallo" class="svg-part" d="M 100 140 Q 110 220 100 300" stroke-width="8" fill="none" stroke-linecap="round" />
+                
+                <path id="hoja-izq" class="svg-part hoja" d="M 100 270 C 50 260 20 180 30 120 C 50 180 80 220 100 240 Z" />
+                <path id="hoja-der" class="svg-part hoja" d="M 100 230 C 150 220 180 140 170 80 C 150 140 120 180 100 200 Z" />
+
+                <g id="petalos-fondo" class="svg-part">
+                    <path class="petalo-fondo" d="M 100 150 C 70 130 50 80 60 30 C 80 50 90 100 100 150 Z" />
+                    <path class="petalo-fondo" d="M 100 150 C 130 130 150 80 140 30 C 120 50 110 100 100 150 Z" />
+                </g>
+
+                <path id="petalo-izq" class="svg-part petalo-lateral" d="M 100 150 C 50 150 20 90 30 40 C 60 70 80 120 100 150 Z" />
+                
+                <path id="petalo-der" class="svg-part petalo-lateral" d="M 100 150 C 150 150 180 90 170 40 C 140 70 120 120 100 150 Z" />
+                
+                <path id="petalo-centro" class="svg-part petalo-centro" d="M 100 150 C 70 120 60 50 100 20 C 140 50 130 120 100 150 Z" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        // 1. Lógica para actualización de colores
+        const root = document.documentElement;
+        const colorFlor = document.getElementById('color-flor');
+        const colorTallo = document.getElementById('color-tallo');
+
+        // Escucha cambios en tiempo real y actualiza las variables CSS
+        colorFlor.addEventListener('input', (e) => root.style.setProperty('--color-flor', e.target.value));
+        colorTallo.addEventListener('input', (e) => root.style.setProperty('--color-tallo', e.target.value));
+
+        // 2. Lógica de construcción paso a paso
+        // Definimos la secuencia lógica de cómo crece la flor
+        const pasos = [
+            { id: 'tallo', textoSiguiente: 'Dibujar Hoja Izquierda' },
+            { id: 'hoja-izq', textoSiguiente: 'Dibujar Hoja Derecha' },
+            { id: 'hoja-der', textoSiguiente: 'Dibujar Pétalos Traseros' },
+            { id: 'petalos-fondo', textoSiguiente: 'Dibujar Pétalo Izquierdo' },
+            { id: 'petalo-izq', textoSiguiente: 'Dibujar Pétalo Derecho' },
+            { id: 'petalo-der', textoSiguiente: 'Dibujar Pétalo Central' },
+            { id: 'petalo-centro', textoSiguiente: '¡Flor Completada!' }
+        ];
+
+        let pasoActual = 0;
+        const btnArmar = document.getElementById('btn-armar');
+        const btnReiniciar = document.getElementById('btn-reiniciar');
+
+        btnArmar.addEventListener('click', () => {
+            if (pasoActual < pasos.length) {
+                // Selecciona el elemento SVG actual y le añade la clase para que aparezca animado
+                const elementoSVG = document.getElementById(pasos[pasoActual].id);
+                elementoSVG.classList.add('visible');
+
+                // Actualiza el texto del botón para indicar el siguiente paso
+                btnArmar.textContent = pasos[pasoActual].textoSiguiente;
+                
+                pasoActual++;
+
+                // Desactiva el botón si ya terminamos
+                if (pasoActual === pasos.length) {
+                    btnArmar.disabled = true;
+                }
+            }
+        });
+
+        // 3. Lógica para reiniciar el dibujo
+        btnReiniciar.addEventListener('click', () => {
+            // Quitamos la clase 'visible' a todas las partes
+            document.querySelectorAll('.svg-part').forEach(el => el.classList.remove('visible'));
+            
+            // Reiniciamos contadores y estados de botones
+            pasoActual = 0;
+            btnArmar.disabled = false;
+            btnArmar.textContent = 'Dibujar Tallo';
+        });
+    </script>
+</body>
+</html>
